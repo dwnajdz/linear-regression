@@ -7,26 +7,29 @@ y = np.array([460, 232, 178])
 
 class LinearRegression:
 	w=0; b=0;
-	def __init__(self, X, y, alpha, iters):
-		#X_normalized = self.zscore(X)
+	def __init__(self, X, y, alpha, iters, normalize=False):
+		if normalize:
+			X = self.zscore(X)
 		n = X.shape[1]
 		new_w = np.zeros((n,))
 		self.w, self.b = self.gd(X, y, new_w, self.b, alpha, iters)
 
 	# standard deviaton
-	def calculate_stdd(self, X, mean, m):
+	def calculate_stdd(self, X, mean, m, n):
 		stdd = 0
 		for i in range(m):
-			stdd += abs((X[i]-mean)**2)
+			for j in range(n):
+				stdd += abs((X[i, j]-mean)**2)
 		return stdd/m
 
 	def zscore(self, X):
-		m = X.shape[0]
+		m, n = X.shape
 		mean = np.mean(X)
-		stdd = self.calculate_stdd(X, mean, m)
-		X_normalized = np.zeros(m)
+		stdd = self.calculate_stdd(X, mean, m, n)
+		X_normalized = np.zeros((m, n))
 		for i in range(m):
-			X_normalized[i] = (X[i]-mean)/stdd 
+			for j in range(n):
+				X_normalized[i, j] = (X[i, j]-mean)/stdd 
 		return X_normalized
 
 	def mean_squared_error(self, y, yhat):
@@ -69,7 +72,7 @@ class LinearRegression:
 			fx[i] = np.dot(self.w, X[i])+self.b
 		return fx
 
-model = LinearRegression(X, y, 5.0e-7, 1000)
+model = LinearRegression(X, y, 5.0e-7, 1000, normalize=False)
 print(model.w, model.b)
 print(model.predict(X))
 
